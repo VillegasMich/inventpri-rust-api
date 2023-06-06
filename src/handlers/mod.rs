@@ -22,7 +22,7 @@ pub async fn get_item_by_id(
 }
 
 pub async fn post_item(
-    json_item: crate::models::Post,
+    json_item: crate::models::Item,
     db: sea_orm::DatabaseConnection,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let item = crate::utilities::post_item(json_item, db).await;

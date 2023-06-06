@@ -45,7 +45,7 @@ pub fn post_item(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
     warp::path!("item")
         .and(warp::path::end())
         .and(warp::post())
-        .and(json_body::<crate::models::Post>())
+        .and(json_body::<crate::models::Item>())
         .and(with_db(db.clone()))
         .and_then(crate::handlers::post_item)
         .boxed()
