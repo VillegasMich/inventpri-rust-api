@@ -42,3 +42,14 @@ pub async fn delete_item_by_id(
         Err(_e) => return Err(warp::reject()),
     }
 }
+
+pub async fn update_item(
+    json_item: crate::models::UpdatedItem,
+    db: sea_orm::DatabaseConnection,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let updated_item = crate::utilities::update_item(json_item, db).await;
+    match updated_item {
+        Ok(item) => Ok(item),
+        Err(_e) => return Err(warp::reject()),
+    }
+}

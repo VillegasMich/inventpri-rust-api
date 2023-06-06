@@ -10,6 +10,8 @@ pub fn router(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
         .boxed()
         .or(delete_item_by_id(db.clone()))
         .boxed()
+        .or(update_item(db.clone()))
+        .boxed()
 }
 
 fn json_body<T: serde::de::DeserializeOwned + Send>(
@@ -51,5 +53,15 @@ pub fn delete_item_by_id(db: DatabaseConnection) -> BoxedFilter<(impl warp::Repl
         .and(warp::delete())
         .and(crate::database::with_db(db.clone()))
         .and_then(crate::handlers::delete_item_by_id)
+        .boxed()
+}
+
+pub fn update_item(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
+    warp::path!("item")
+        .and(warp::path::end())
+        .and(warp::put())
+        .and(json_body::<crate::models::UpdatedItem>())
+        .and(crate::database::with_db(db.clone()))
+        .and_then(crate::handlers::update_item)
         .boxed()
 }
