@@ -12,11 +12,13 @@ pub fn router(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
         .boxed()
         .or(update_item(db.clone()))
         .boxed()
+        .or(move_item(db.clone()))
+        .boxed()
 }
 
 fn json_body<T: serde::de::DeserializeOwned + Send>(
 ) -> impl Filter<Extract = (T,), Error = warp::Rejection> + Clone {
-    warp::body::content_length_limit(1024 * 1000).and(warp::body::json::<T>())
+    warp::body::content_length_limit(1024 * 10000).and(warp::body::json::<T>())
 }
 
 pub fn get_all_items(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
@@ -63,5 +65,15 @@ pub fn update_item(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
         .and(json_body::<crate::models::UpdatedItem>())
         .and(crate::database::with_db(db.clone()))
         .and_then(crate::handlers::update_item)
+        .boxed()
+}
+
+pub fn move_item(db: DatabaseConnection) -> BoxedFilter<(impl warp::Reply,)> {
+    warp::path!("item" / "move")
+        .and(warp::path::end())
+        .and(warp::put())
+        .and(json_body::<crate::models::MovedItem>())
+        .and(crate::database::with_db(db.clone()))
+        .and_then(crate::handlers::move_item)
         .boxed()
 }

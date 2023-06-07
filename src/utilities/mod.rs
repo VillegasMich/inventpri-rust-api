@@ -56,10 +56,7 @@ pub async fn update_item(
 ) -> Result<impl warp::Reply, anyhow::Error> {
     let id = json_item.id as i32;
     let mut item: crate::entity::item::ActiveModel =
-        match super::entity::item::Entity::find_by_id(id as i32)
-            .one(&db)
-            .await?
-        {
+        match super::entity::item::Entity::find_by_id(id).one(&db).await? {
             Some(item) => item.into(),
             None => {
                 return Err(anyhow!("Something bad happened"));
@@ -69,6 +66,30 @@ pub async fn update_item(
     item.id = Set(id);
     item.name = Set(json_item.name.to_lowercase().to_owned());
     item.price = Set(json_item.price.to_string().to_owned()); //TODO when migration done change this to u32
+    item.location = Set(json_item.location.to_lowercase().to_owned());
+
+    let item = item.update(&db).await?;
+
+    Ok(with_status(
+        warp::reply::json(&item),
+        warp::http::StatusCode::OK,
+    ))
+}
+
+pub async fn move_item(
+    json_item: crate::models::MovedItem,
+    db: DatabaseConnection,
+) -> Result<impl warp::Reply, anyhow::Error> {
+    let id = json_item.id as i32;
+    let mut item: crate::entity::item::ActiveModel =
+        match super::entity::item::Entity::find_by_id(id).one(&db).await? {
+            Some(item) => item.into(),
+            None => {
+                return Err(anyhow!("Something bad happened"));
+            }
+        };
+
+    item.id = Set(id);
     item.location = Set(json_item.location.to_lowercase().to_owned());
 
     let item = item.update(&db).await?;
